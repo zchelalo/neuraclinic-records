@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS attachments;
+DROP TABLE IF EXISTS notes;
+DROP TABLE IF EXISTS appointments;
+DROP TABLE IF EXISTS familiograms;
+DROP TABLE IF EXISTS patients;
+DROP TABLE IF EXISTS addresses;
+
