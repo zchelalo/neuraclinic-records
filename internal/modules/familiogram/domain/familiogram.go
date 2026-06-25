@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-type Familyogram struct {
+type Familiogram struct {
 	ID        uuid.UUID
 	Data      *structpb.Struct
 	PatientID uuid.UUID

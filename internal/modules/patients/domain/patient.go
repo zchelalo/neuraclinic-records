@@ -60,7 +60,7 @@ type PatientSummary struct {
 type PatientCreate struct {
 	ID             uuid.UUID
 	AddressID      uuid.UUID
-	FamilyogramID  uuid.UUID
+	FamiliogramID  uuid.UUID
 	PsychologistID uuid.UUID
 	FirstName      string
 	MiddleName     *string

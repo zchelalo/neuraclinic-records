@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createFamilyogram = `-- name: CreateFamilyogram :exec
+const createFamiliogram = `-- name: CreateFamiliogram :exec
 INSERT INTO familiograms (
   id, data, patient_id, created_at, updated_at
 ) VALUES (
@@ -19,15 +19,15 @@ INSERT INTO familiograms (
 )
 `
 
-type CreateFamilyogramParams struct {
+type CreateFamiliogramParams struct {
 	ID        pgtype.UUID        `json:"id"`
 	Data      []byte             `json:"data"`
 	PatientID pgtype.UUID        `json:"patient_id"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
-func (q *Queries) CreateFamilyogram(ctx context.Context, arg CreateFamilyogramParams) error {
-	_, err := q.db.Exec(ctx, createFamilyogram,
+func (q *Queries) CreateFamiliogram(ctx context.Context, arg CreateFamiliogramParams) error {
+	_, err := q.db.Exec(ctx, createFamiliogram,
 		arg.ID,
 		arg.Data,
 		arg.PatientID,
@@ -36,7 +36,7 @@ func (q *Queries) CreateFamilyogram(ctx context.Context, arg CreateFamilyogramPa
 	return err
 }
 
-const getFamilyogramByPatientID = `-- name: GetFamilyogramByPatientID :one
+const getFamiliogramByPatientID = `-- name: GetFamiliogramByPatientID :one
 SELECT f.id, f.data, f.patient_id, f.created_at, f.updated_at
 FROM familiograms f
 JOIN patients p ON p.id = f.patient_id
@@ -45,13 +45,13 @@ WHERE f.patient_id = $1
   AND p.deleted_at IS NULL
 `
 
-type GetFamilyogramByPatientIDParams struct {
+type GetFamiliogramByPatientIDParams struct {
 	PatientID      pgtype.UUID `json:"patient_id"`
 	PsychologistID pgtype.UUID `json:"psychologist_id"`
 }
 
-func (q *Queries) GetFamilyogramByPatientID(ctx context.Context, arg GetFamilyogramByPatientIDParams) (Familiogram, error) {
-	row := q.db.QueryRow(ctx, getFamilyogramByPatientID, arg.PatientID, arg.PsychologistID)
+func (q *Queries) GetFamiliogramByPatientID(ctx context.Context, arg GetFamiliogramByPatientIDParams) (Familiogram, error) {
+	row := q.db.QueryRow(ctx, getFamiliogramByPatientID, arg.PatientID, arg.PsychologistID)
 	var i Familiogram
 	err := row.Scan(
 		&i.ID,
@@ -63,7 +63,7 @@ func (q *Queries) GetFamilyogramByPatientID(ctx context.Context, arg GetFamilyog
 	return i, err
 }
 
-const updateFamilyogram = `-- name: UpdateFamilyogram :one
+const updateFamiliogram = `-- name: UpdateFamiliogram :one
 UPDATE familiograms f
 SET data = $3, updated_at = $4
 FROM patients p
@@ -74,15 +74,15 @@ WHERE p.id = f.patient_id
 RETURNING f.id, f.data, f.patient_id, f.created_at, f.updated_at
 `
 
-type UpdateFamilyogramParams struct {
+type UpdateFamiliogramParams struct {
 	ID             pgtype.UUID        `json:"id"`
 	PsychologistID pgtype.UUID        `json:"psychologist_id"`
 	Data           []byte             `json:"data"`
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
-func (q *Queries) UpdateFamilyogram(ctx context.Context, arg UpdateFamilyogramParams) (Familiogram, error) {
-	row := q.db.QueryRow(ctx, updateFamilyogram,
+func (q *Queries) UpdateFamiliogram(ctx context.Context, arg UpdateFamiliogramParams) (Familiogram, error) {
+	row := q.db.QueryRow(ctx, updateFamiliogram,
 		arg.ID,
 		arg.PsychologistID,
 		arg.Data,

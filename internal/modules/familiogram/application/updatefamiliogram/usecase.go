@@ -1,12 +1,12 @@
-package updatefamilyogram
+package updatefamiliogram
 
 import (
 	"context"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/domain"
-	"github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/ports"
+	"github.com/zchelalo/neuraclinic-records/internal/modules/familiogram/domain"
+	"github.com/zchelalo/neuraclinic-records/internal/modules/familiogram/ports"
 	appshared "github.com/zchelalo/neuraclinic-records/internal/shared/recordapp"
 	recorderrors "github.com/zchelalo/neuraclinic-records/internal/shared/recorderrors"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -28,12 +28,12 @@ type Command struct {
 	Data           *structpb.Struct
 }
 
-func (uc *UseCase) Execute(ctx context.Context, cmd Command) (domain.Familyogram, error) {
+func (uc *UseCase) Execute(ctx context.Context, cmd Command) (domain.Familiogram, error) {
 	if cmd.PsychologistID == uuid.Nil {
-		return domain.Familyogram{}, recorderrors.ErrUnauthenticated
+		return domain.Familiogram{}, recorderrors.ErrUnauthenticated
 	}
 	if cmd.ID == uuid.Nil || cmd.Data == nil {
-		return domain.Familyogram{}, recorderrors.ErrInvalidInput
+		return domain.Familiogram{}, recorderrors.ErrInvalidInput
 	}
-	return uc.repo.UpdateFamilyogram(ctx, cmd.PsychologistID, cmd.ID, cmd.Data, uc.now().UTC())
+	return uc.repo.UpdateFamiliogram(ctx, cmd.PsychologistID, cmd.ID, cmd.Data, uc.now().UTC())
 }

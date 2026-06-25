@@ -19,8 +19,8 @@ import (
 	appointmentports "github.com/zchelalo/neuraclinic-records/internal/modules/appointments/ports"
 	attachmentdomain "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/domain"
 	attachmentports "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/ports"
-	familyogramdomain "github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/domain"
-	familyogramports "github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/ports"
+	familiogramdomain "github.com/zchelalo/neuraclinic-records/internal/modules/familiogram/domain"
+	familiogramports "github.com/zchelalo/neuraclinic-records/internal/modules/familiogram/ports"
 	notedomain "github.com/zchelalo/neuraclinic-records/internal/modules/notes/domain"
 	noteports "github.com/zchelalo/neuraclinic-records/internal/modules/notes/ports"
 	patientdomain "github.com/zchelalo/neuraclinic-records/internal/modules/patients/domain"
@@ -88,8 +88,8 @@ func (r *Repository) CreatePatient(ctx context.Context, patient patientdomain.Pa
 		return patientdomain.PatientSummary{}, err
 	}
 
-	if err := q.CreateFamilyogram(ctx, recordsdb.CreateFamilyogramParams{
-		ID:        pgutil.UUID(patient.FamilyogramID),
+	if err := q.CreateFamiliogram(ctx, recordsdb.CreateFamiliogramParams{
+		ID:        pgutil.UUID(patient.FamiliogramID),
 		Data:      []byte(`{}`),
 		PatientID: pgutil.UUID(patient.ID),
 		CreatedAt: pgutil.Timestamptz(now),
@@ -242,32 +242,32 @@ func (r *Repository) PatientExists(ctx context.Context, psychologistID, id uuid.
 	})
 }
 
-func (r *Repository) FamilyogramByPatientID(ctx context.Context, psychologistID, patientID uuid.UUID) (familyogramdomain.Familyogram, error) {
-	row, err := r.q.GetFamilyogramByPatientID(ctx, recordsdb.GetFamilyogramByPatientIDParams{
+func (r *Repository) FamiliogramByPatientID(ctx context.Context, psychologistID, patientID uuid.UUID) (familiogramdomain.Familiogram, error) {
+	row, err := r.q.GetFamiliogramByPatientID(ctx, recordsdb.GetFamiliogramByPatientIDParams{
 		PatientID:      pgutil.UUID(patientID),
 		PsychologistID: pgutil.UUID(psychologistID),
 	})
 	if err != nil {
-		return familyogramdomain.Familyogram{}, mapNoRows(err)
+		return familiogramdomain.Familiogram{}, mapNoRows(err)
 	}
-	return familyogramFromRow(row)
+	return familiogramFromRow(row)
 }
 
-func (r *Repository) UpdateFamilyogram(ctx context.Context, psychologistID, id uuid.UUID, data *structpb.Struct, now time.Time) (familyogramdomain.Familyogram, error) {
+func (r *Repository) UpdateFamiliogram(ctx context.Context, psychologistID, id uuid.UUID, data *structpb.Struct, now time.Time) (familiogramdomain.Familiogram, error) {
 	raw, err := marshalStruct(data)
 	if err != nil {
-		return familyogramdomain.Familyogram{}, err
+		return familiogramdomain.Familiogram{}, err
 	}
-	row, err := r.q.UpdateFamilyogram(ctx, recordsdb.UpdateFamilyogramParams{
+	row, err := r.q.UpdateFamiliogram(ctx, recordsdb.UpdateFamiliogramParams{
 		ID:             pgutil.UUID(id),
 		PsychologistID: pgutil.UUID(psychologistID),
 		Data:           raw,
 		UpdatedAt:      pgutil.Timestamptz(now.UTC()),
 	})
 	if err != nil {
-		return familyogramdomain.Familyogram{}, mapNoRows(err)
+		return familiogramdomain.Familiogram{}, mapNoRows(err)
 	}
-	return familyogramFromRow(row)
+	return familiogramFromRow(row)
 }
 
 func (r *Repository) CreateAppointment(ctx context.Context, appointment appointmentdomain.AppointmentCreate) (appointmentdomain.Appointment, error) {
@@ -632,14 +632,14 @@ func patientSummaryFromRow(row recordsdb.ListPatientsRow) patientdomain.PatientS
 	}
 }
 
-func familyogramFromRow(row recordsdb.Familiogram) (familyogramdomain.Familyogram, error) {
+func familiogramFromRow(row recordsdb.Familiogram) (familiogramdomain.Familiogram, error) {
 	data := &structpb.Struct{}
 	if len(row.Data) > 0 {
 		if err := protojson.Unmarshal(row.Data, data); err != nil {
-			return familyogramdomain.Familyogram{}, fmt.Errorf("unmarshal familyogram data: %w", err)
+			return familiogramdomain.Familiogram{}, fmt.Errorf("unmarshal familiogram data: %w", err)
 		}
 	}
-	return familyogramdomain.Familyogram{
+	return familiogramdomain.Familiogram{
 		ID:        pgutil.UUIDValue(row.ID),
 		Data:      data,
 		PatientID: pgutil.UUIDValue(row.PatientID),
@@ -737,10 +737,10 @@ func marshalStruct(data *structpb.Struct) ([]byte, error) {
 	}
 	raw, err := protojson.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("marshal familyogram data: %w", err)
+		return nil, fmt.Errorf("marshal familiogram data: %w", err)
 	}
 	if !json.Valid(raw) {
-		return nil, fmt.Errorf("familyogram data is not valid json")
+		return nil, fmt.Errorf("familiogram data is not valid json")
 	}
 	return raw, nil
 }
@@ -759,5 +759,5 @@ func rollback(ctx context.Context, tx pgx.Tx) {
 var _ patientports.Repository = (*Repository)(nil)
 var _ appointmentports.Repository = (*Repository)(nil)
 var _ noteports.Repository = (*Repository)(nil)
-var _ familyogramports.Repository = (*Repository)(nil)
+var _ familiogramports.Repository = (*Repository)(nil)
 var _ attachmentports.Repository = (*Repository)(nil)

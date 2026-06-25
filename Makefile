@@ -33,7 +33,7 @@ ifneq ("$(wildcard $(LOCAL_PROTO_CONTRACTS)/buf.yaml)", "")
 		--path proto/record/v1/patient.proto \
 		--path proto/record/v1/appointment.proto \
 		--path proto/record/v1/note.proto \
-		--path proto/record/v1/familyogram.proto \
+		--path proto/record/v1/familiogram.proto \
 		--path proto/record/v1/attachment.proto \
 		--path proto/file_management/v1/file_management.proto \
 		--path proto/shared/v1/shared.proto
@@ -42,7 +42,7 @@ else
 		--path record/v1/patient.proto \
 		--path record/v1/appointment.proto \
 		--path record/v1/note.proto \
-		--path record/v1/familyogram.proto \
+		--path record/v1/familiogram.proto \
 		--path record/v1/attachment.proto \
 		--path file_management/v1/file_management.proto \
 		--path shared/v1/shared.proto
@@ -93,4 +93,3 @@ sqlc:
 	docker run --rm --user $(shell id -u):$(shell id -g) -v $(shell pwd):/src -w /src $(SQLC_IMAGE) generate
 
 .PHONY: setup create-envs tls-generate-dev create-network proto migrate-up migrate-down compose compose-detached compose-build compose-build-detached compose-down fmt lint test coverage build sqlc
-

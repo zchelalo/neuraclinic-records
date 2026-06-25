@@ -8,7 +8,7 @@ import (
 	recordv1 "github.com/zchelalo/neuraclinic-records/gen/go/record/v1"
 	appointmentsgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/appointments/adapters/grpc"
 	attachmentsgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/adapters/grpc"
-	familyogramgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/adapters/grpc"
+	familiogramgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/familiogram/adapters/grpc"
 	notesgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/notes/adapters/grpc"
 	patientsgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/patients/adapters/grpc"
 	"go.uber.org/zap"
@@ -32,7 +32,7 @@ type Services struct {
 	Patient     *patientsgrpc.PatientService
 	Appointment *appointmentsgrpc.AppointmentService
 	Note        *notesgrpc.NoteService
-	Familyogram *familyogramgrpc.FamilyogramService
+	Familiogram *familiogramgrpc.FamiliogramService
 	Attachment  *attachmentsgrpc.AttachmentService
 }
 
@@ -58,7 +58,7 @@ func New(cfg Config, logger *zap.Logger, appServices Services) (*Server, error) 
 	recordv1.RegisterPatientServiceServer(grpcServer, appServices.Patient)
 	recordv1.RegisterAppointmentServiceServer(grpcServer, appServices.Appointment)
 	recordv1.RegisterNoteServiceServer(grpcServer, appServices.Note)
-	recordv1.RegisterFamilyogramServiceServer(grpcServer, appServices.Familyogram)
+	recordv1.RegisterFamiliogramServiceServer(grpcServer, appServices.Familiogram)
 	recordv1.RegisterAttachmentServiceServer(grpcServer, appServices.Attachment)
 
 	return &Server{

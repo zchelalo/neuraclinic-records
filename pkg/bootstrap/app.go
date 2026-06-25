@@ -11,8 +11,8 @@ import (
 	attachmentsgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/adapters/grpc"
 	attachmentsrabbit "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/adapters/rabbitmq"
 	attachmentsapp "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/application"
-	familyogramgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/adapters/grpc"
-	familyogramapp "github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/application"
+	familiogramgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/familiogram/adapters/grpc"
+	familiogramapp "github.com/zchelalo/neuraclinic-records/internal/modules/familiogram/application"
 	notesgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/notes/adapters/grpc"
 	notesapp "github.com/zchelalo/neuraclinic-records/internal/modules/notes/application"
 	patientsgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/patients/adapters/grpc"
@@ -53,7 +53,7 @@ func InitApp(ctx context.Context, logger *zap.Logger, cfg Config) (*App, error) 
 	patientsApp := patientsapp.NewService(appCfg, repo)
 	appointmentsApp := appointmentsapp.NewService(appCfg, repo)
 	notesApp := notesapp.NewService(appCfg, repo)
-	familyogramApp := familyogramapp.NewService(repo)
+	familiogramApp := familiogramapp.NewService(repo)
 	attachmentsApp := attachmentsapp.NewService(appCfg, repo, filesClient)
 	consumer, err := attachmentsrabbit.NewConsumer(attachmentsrabbit.Config{
 		URL:        cfg.RabbitMQURL,
@@ -79,7 +79,7 @@ func InitApp(ctx context.Context, logger *zap.Logger, cfg Config) (*App, error) 
 		Patient:     patientsgrpc.NewPatientService(patientsApp),
 		Appointment: appointmentsgrpc.NewAppointmentService(appointmentsApp),
 		Note:        notesgrpc.NewNoteService(notesApp),
-		Familyogram: familyogramgrpc.NewFamilyogramService(familyogramApp),
+		Familiogram: familiogramgrpc.NewFamiliogramService(familiogramApp),
 		Attachment:  attachmentsgrpc.NewAttachmentService(attachmentsApp),
 	})
 	if err != nil {

@@ -63,7 +63,7 @@ func (uc *UseCase) Execute(ctx context.Context, cmd Command) (domain.PatientSumm
 	return uc.repo.CreatePatient(ctx, domain.PatientCreate{
 		ID:             uc.newUUID(),
 		AddressID:      uc.newUUID(),
-		FamilyogramID:  uc.newUUID(),
+		FamiliogramID:  uc.newUUID(),
 		PsychologistID: cmd.PsychologistID,
 		FirstName:      strings.TrimSpace(cmd.FirstName),
 		MiddleName:     trimPtr(cmd.MiddleName),

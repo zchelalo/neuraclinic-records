@@ -8,7 +8,7 @@ import (
 	sharedv1 "github.com/zchelalo/neuraclinic-records/gen/go/shared/v1"
 	appointmentdomain "github.com/zchelalo/neuraclinic-records/internal/modules/appointments/domain"
 	attachmentdomain "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/domain"
-	familyogramdomain "github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/domain"
+	familiogramdomain "github.com/zchelalo/neuraclinic-records/internal/modules/familiogram/domain"
 	notedomain "github.com/zchelalo/neuraclinic-records/internal/modules/notes/domain"
 	patientdomain "github.com/zchelalo/neuraclinic-records/internal/modules/patients/domain"
 	appshared "github.com/zchelalo/neuraclinic-records/internal/shared/recordapp"
@@ -153,13 +153,13 @@ func NoteSummaryToProto(note notedomain.NoteSummary) *recordv1.NoteSummary {
 	return resp
 }
 
-func FamilyogramToProto(familyogram familyogramdomain.Familyogram) *recordv1.Familyogram {
-	return &recordv1.Familyogram{
-		Id:        familyogram.ID.String(),
-		Data:      familyogram.Data,
-		PatientId: familyogram.PatientID.String(),
-		CreatedAt: timestamppb.New(familyogram.CreatedAt),
-		UpdatedAt: timestamppb.New(familyogram.UpdatedAt),
+func FamiliogramToProto(familiogram familiogramdomain.Familiogram) *recordv1.Familiogram {
+	return &recordv1.Familiogram{
+		Id:        familiogram.ID.String(),
+		Data:      familiogram.Data,
+		PatientId: familiogram.PatientID.String(),
+		CreatedAt: timestamppb.New(familiogram.CreatedAt),
+		UpdatedAt: timestamppb.New(familiogram.UpdatedAt),
 	}
 }
 

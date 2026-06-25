@@ -7,7 +7,7 @@ import (
 	recordgrpc "github.com/zchelalo/neuraclinic-records/internal/shared/recordgrpc"
 )
 
-func (s *FamilyogramService) FindByPatientId(ctx context.Context, req *recordv1.FamilyogramServiceFindByPatientIdRequest) (*recordv1.FamilyogramServiceFindByPatientIdResponse, error) {
+func (s *FamiliogramService) FindByPatientId(ctx context.Context, req *recordv1.FamiliogramServiceFindByPatientIdRequest) (*recordv1.FamiliogramServiceFindByPatientIdResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
 		return nil, recordgrpc.MapError(err)
@@ -16,14 +16,14 @@ func (s *FamilyogramService) FindByPatientId(ctx context.Context, req *recordv1.
 	if err != nil {
 		return nil, recordgrpc.MapError(err)
 	}
-	familyogram, err := s.app.FindFamilyogram(ctx, psychologistID, patientID)
+	familiogram, err := s.app.FindFamiliogram(ctx, psychologistID, patientID)
 	if err != nil {
 		return nil, recordgrpc.MapError(err)
 	}
-	return &recordv1.FamilyogramServiceFindByPatientIdResponse{Familyogram: recordgrpc.FamilyogramToProto(familyogram)}, nil
+	return &recordv1.FamiliogramServiceFindByPatientIdResponse{Familiogram: recordgrpc.FamiliogramToProto(familiogram)}, nil
 }
 
-func (s *FamilyogramService) Update(ctx context.Context, req *recordv1.FamilyogramServiceUpdateRequest) (*recordv1.FamilyogramServiceUpdateResponse, error) {
+func (s *FamiliogramService) Update(ctx context.Context, req *recordv1.FamiliogramServiceUpdateRequest) (*recordv1.FamiliogramServiceUpdateResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
 		return nil, recordgrpc.MapError(err)
@@ -32,9 +32,9 @@ func (s *FamilyogramService) Update(ctx context.Context, req *recordv1.Familyogr
 	if err != nil {
 		return nil, recordgrpc.MapError(err)
 	}
-	familyogram, err := s.app.UpdateFamilyogram(ctx, psychologistID, id, req.GetData())
+	familiogram, err := s.app.UpdateFamiliogram(ctx, psychologistID, id, req.GetData())
 	if err != nil {
 		return nil, recordgrpc.MapError(err)
 	}
-	return &recordv1.FamilyogramServiceUpdateResponse{Familyogram: recordgrpc.FamilyogramToProto(familyogram)}, nil
+	return &recordv1.FamiliogramServiceUpdateResponse{Familiogram: recordgrpc.FamiliogramToProto(familiogram)}, nil
 }
