@@ -11,10 +11,13 @@ import (
 	"github.com/google/uuid"
 	filemanagementv1 "github.com/zchelalo/neuraclinic-records/gen/go/file_management/v1"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/ports"
+	recorderrors "github.com/zchelalo/neuraclinic-records/internal/shared/recorderrors"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -63,7 +66,7 @@ func (c *Client) RequestUpload(ctx context.Context, originalName, mimeType strin
 		ServiceOrigin: serviceOrigin,
 	})
 	if err != nil {
-		return uuid.Nil, "", time.Time{}, err
+		return uuid.Nil, "", time.Time{}, mapGRPCError(err)
 	}
 	id, err := uuid.Parse(resp.GetId())
 	if err != nil {
@@ -81,7 +84,7 @@ func (c *Client) GenerateDownloadURL(ctx context.Context, id uuid.UUID) (string,
 		Id: id.String(),
 	})
 	if err != nil {
-		return "", time.Time{}, err
+		return "", time.Time{}, mapGRPCError(err)
 	}
 	expiresAt := time.Time{}
 	if resp.GetExpiresAt() != nil {
@@ -134,6 +137,30 @@ func transportCredentials(cfg Config) (credentials.TransportCredentials, error) 
 	}
 
 	return credentials.NewTLS(tlsCfg), nil
+}
+
+func mapGRPCError(err error) error {
+	st, ok := status.FromError(err)
+	if !ok {
+		return err
+	}
+
+	switch st.Code() {
+	case codes.Unauthenticated:
+		return recorderrors.ErrUnauthenticated
+	case codes.PermissionDenied:
+		return recorderrors.ErrForbidden
+	case codes.NotFound:
+		return recorderrors.ErrNotFound
+	case codes.InvalidArgument:
+		return recorderrors.ErrInvalidInput
+	case codes.AlreadyExists:
+		return recorderrors.ErrConflict
+	case codes.FailedPrecondition:
+		return recorderrors.ErrFailedPrecondition
+	default:
+		return err
+	}
 }
 
 var _ ports.FileManagementClient = (*Client)(nil)

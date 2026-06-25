@@ -485,12 +485,13 @@ func (r *Repository) NoteBelongsToPatient(ctx context.Context, psychologistID, n
 
 func (r *Repository) CreateAttachment(ctx context.Context, attachment attachmentdomain.AttachmentCreate, fileID uuid.UUID) (attachmentdomain.Attachment, error) {
 	row, err := r.q.CreateAttachment(ctx, recordsdb.CreateAttachmentParams{
-		ID:        pgutil.UUID(attachment.ID),
-		FileID:    pgutil.UUID(fileID),
-		MimeType:  attachment.MimeType,
-		PatientID: pgutil.UUID(attachment.PatientID),
-		NoteID:    pgutil.OptionalUUID(attachment.NoteID),
-		CreatedAt: pgutil.Timestamptz(attachment.Now.UTC()),
+		ID:           pgutil.UUID(attachment.ID),
+		FileID:       pgutil.UUID(fileID),
+		MimeType:     attachment.MimeType,
+		PatientID:    pgutil.UUID(attachment.PatientID),
+		NoteID:       pgutil.OptionalUUID(attachment.NoteID),
+		UploadStatus: sharedv1.FileStatus_FILE_STATUS_UPLOADING.String(),
+		CreatedAt:    pgutil.Timestamptz(attachment.Now.UTC()),
 	})
 	if err != nil {
 		return attachmentdomain.Attachment{}, err
@@ -537,6 +538,18 @@ func (r *Repository) ListAttachments(ctx context.Context, filter attachmentdomai
 		Attachments: page.Items,
 		Meta:        page.Meta,
 	}, nil
+}
+
+func (r *Repository) UpdateAttachmentUploadStatusByFileID(ctx context.Context, fileID uuid.UUID, status sharedv1.FileStatus, now time.Time) (attachmentdomain.Attachment, error) {
+	row, err := r.q.UpdateAttachmentUploadStatusByFileID(ctx, recordsdb.UpdateAttachmentUploadStatusByFileIDParams{
+		FileID:       pgutil.UUID(fileID),
+		UploadStatus: status.String(),
+		UpdatedAt:    pgutil.Timestamptz(now.UTC()),
+	})
+	if err != nil {
+		return attachmentdomain.Attachment{}, mapNoRows(err)
+	}
+	return attachmentFromRow(row), nil
 }
 
 func (r *Repository) DeleteAttachment(ctx context.Context, psychologistID, id uuid.UUID, now time.Time) error {
@@ -678,15 +691,23 @@ func noteSummaryFromRow(row recordsdb.ListNotesRow) notedomain.NoteSummary {
 
 func attachmentFromRow(row recordsdb.Attachment) attachmentdomain.Attachment {
 	return attachmentdomain.Attachment{
-		ID:        pgutil.UUIDValue(row.ID),
-		FileID:    pgutil.UUIDValue(row.FileID),
-		MimeType:  row.MimeType,
-		PatientID: pgutil.UUIDValue(row.PatientID),
-		NoteID:    pgutil.UUIDPtr(row.NoteID),
-		CreatedAt: row.CreatedAt.Time,
-		UpdatedAt: row.UpdatedAt.Time,
-		DeletedAt: pgutil.TimestamptzPtr(row.DeletedAt),
+		ID:           pgutil.UUIDValue(row.ID),
+		FileID:       pgutil.UUIDValue(row.FileID),
+		MimeType:     row.MimeType,
+		UploadStatus: parseFileStatus(row.UploadStatus),
+		PatientID:    pgutil.UUIDValue(row.PatientID),
+		NoteID:       pgutil.UUIDPtr(row.NoteID),
+		CreatedAt:    row.CreatedAt.Time,
+		UpdatedAt:    row.UpdatedAt.Time,
+		DeletedAt:    pgutil.TimestamptzPtr(row.DeletedAt),
 	}
+}
+
+func parseFileStatus(value string) sharedv1.FileStatus {
+	if parsed, ok := sharedv1.FileStatus_value[value]; ok {
+		return sharedv1.FileStatus(parsed)
+	}
+	return sharedv1.FileStatus_FILE_STATUS_UNSPECIFIED
 }
 
 func parseSex(value string) recordv1.Sex {

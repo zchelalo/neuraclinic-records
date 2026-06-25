@@ -4,20 +4,22 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	sharedv1 "github.com/zchelalo/neuraclinic-records/gen/go/shared/v1"
 	appshared "github.com/zchelalo/neuraclinic-records/internal/shared/recordapp"
 )
 
 type Attachment struct {
-	ID          uuid.UUID
-	FileID      uuid.UUID
-	MimeType    string
-	DownloadURL *string
-	ExpiresAt   *time.Time
-	PatientID   uuid.UUID
-	NoteID      *uuid.UUID
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   *time.Time
+	ID           uuid.UUID
+	FileID       uuid.UUID
+	MimeType     string
+	UploadStatus sharedv1.FileStatus
+	DownloadURL  *string
+	ExpiresAt    *time.Time
+	PatientID    uuid.UUID
+	NoteID       *uuid.UUID
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    *time.Time
 }
 
 type AttachmentCreate struct {

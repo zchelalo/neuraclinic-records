@@ -1,0 +1,2 @@
+ALTER TABLE attachments
+ADD COLUMN upload_status varchar(50) NOT NULL DEFAULT 'FILE_STATUS_UPLOADING';

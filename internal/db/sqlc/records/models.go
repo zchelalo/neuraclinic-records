@@ -37,14 +37,15 @@ type Appointment struct {
 }
 
 type Attachment struct {
-	ID        pgtype.UUID        `json:"id"`
-	FileID    pgtype.UUID        `json:"file_id"`
-	MimeType  string             `json:"mime_type"`
-	PatientID pgtype.UUID        `json:"patient_id"`
-	NoteID    pgtype.UUID        `json:"note_id"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+	ID           pgtype.UUID        `json:"id"`
+	FileID       pgtype.UUID        `json:"file_id"`
+	MimeType     string             `json:"mime_type"`
+	PatientID    pgtype.UUID        `json:"patient_id"`
+	NoteID       pgtype.UUID        `json:"note_id"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
+	UploadStatus string             `json:"upload_status"`
 }
 
 type Familiogram struct {

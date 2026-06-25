@@ -9,6 +9,7 @@ import (
 	appointmentsapp "github.com/zchelalo/neuraclinic-records/internal/modules/appointments/application"
 	filemanagementadapter "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/adapters/filemanagement"
 	attachmentsgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/adapters/grpc"
+	attachmentsrabbit "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/adapters/rabbitmq"
 	attachmentsapp "github.com/zchelalo/neuraclinic-records/internal/modules/attachments/application"
 	familyogramgrpc "github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/adapters/grpc"
 	familyogramapp "github.com/zchelalo/neuraclinic-records/internal/modules/familyogram/application"
@@ -22,8 +23,9 @@ import (
 )
 
 type App struct {
-	Server  *grpcserver.Server
-	Cleanup func(context.Context) error
+	Server   *grpcserver.Server
+	Consumer *attachmentsrabbit.Consumer
+	Cleanup  func(context.Context) error
 }
 
 func InitApp(ctx context.Context, logger *zap.Logger, cfg Config) (*App, error) {
@@ -53,6 +55,20 @@ func InitApp(ctx context.Context, logger *zap.Logger, cfg Config) (*App, error) 
 	notesApp := notesapp.NewService(appCfg, repo)
 	familyogramApp := familyogramapp.NewService(repo)
 	attachmentsApp := attachmentsapp.NewService(appCfg, repo, filesClient)
+	consumer, err := attachmentsrabbit.NewConsumer(attachmentsrabbit.Config{
+		URL:        cfg.RabbitMQURL,
+		Exchange:   cfg.RabbitMQExchange,
+		Queue:      cfg.RabbitMQQueue,
+		RoutingKey: cfg.RabbitMQRoutingKey,
+		DLX:        cfg.RabbitMQDLX,
+		DLQ:        cfg.RabbitMQDLQ,
+		Prefetch:   cfg.RabbitMQPrefetch,
+	}, attachmentsrabbit.NewHandler(attachmentsApp), logger)
+	if err != nil {
+		_ = filesClient.Close()
+		db.Close()
+		return nil, fmt.Errorf("cannot initialize rabbitmq consumer: %w", err)
+	}
 
 	server, err := grpcserver.New(grpcserver.Config{
 		Port:            cfg.Port,
@@ -67,15 +83,18 @@ func InitApp(ctx context.Context, logger *zap.Logger, cfg Config) (*App, error) 
 		Attachment:  attachmentsgrpc.NewAttachmentService(attachmentsApp),
 	})
 	if err != nil {
+		_ = consumer.Close()
 		_ = filesClient.Close()
 		db.Close()
 		return nil, fmt.Errorf("cannot create grpc server: %w", err)
 	}
 
 	return &App{
-		Server: server,
+		Server:   server,
+		Consumer: consumer,
 		Cleanup: func(context.Context) error {
 			server.GracefulStop()
+			_ = consumer.Close()
 			_ = filesClient.Close()
 			db.Close()
 			return nil

@@ -35,6 +35,7 @@ type Attachment struct {
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
+	UploadStatus  v1.FileStatus          `protobuf:"varint,11,opt,name=upload_status,json=uploadStatus,proto3,enum=shared.v1.FileStatus" json:"upload_status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -137,6 +138,13 @@ func (x *Attachment) GetDeletedAt() *timestamppb.Timestamp {
 		return x.DeletedAt
 	}
 	return nil
+}
+
+func (x *Attachment) GetUploadStatus() v1.FileStatus {
+	if x != nil {
+		return x.UploadStatus
+	}
+	return v1.FileStatus(0)
 }
 
 type AttachmentServiceCreateRequest struct {
@@ -575,7 +583,7 @@ var File_record_v1_attachment_proto protoreflect.FileDescriptor
 
 const file_record_v1_attachment_proto_rawDesc = "" +
 	"\n" +
-	"\x1arecord/v1/attachment.proto\x12\trecord.v1\x1a\x16shared/v1/shared.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe8\x03\n" +
+	"\x1arecord/v1/attachment.proto\x12\trecord.v1\x1a\x16shared/v1/shared.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa4\x04\n" +
 	"\n" +
 	"Attachment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
@@ -593,7 +601,8 @@ const file_record_v1_attachment_proto_rawDesc = "" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
 	"\n" +
 	"deleted_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampH\x03R\tdeletedAt\x88\x01\x01B\x0f\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampH\x03R\tdeletedAt\x88\x01\x01\x12:\n" +
+	"\rupload_status\x18\v \x01(\x0e2\x15.shared.v1.FileStatusR\fuploadStatusB\x0f\n" +
 	"\r_download_urlB\r\n" +
 	"\v_expires_atB\n" +
 	"\n" +
@@ -670,34 +679,36 @@ var file_record_v1_attachment_proto_goTypes = []any{
 	(*AttachmentServiceDeleteRequest)(nil),    // 7: record.v1.AttachmentServiceDeleteRequest
 	(*AttachmentServiceDeleteResponse)(nil),   // 8: record.v1.AttachmentServiceDeleteResponse
 	(*timestamppb.Timestamp)(nil),             // 9: google.protobuf.Timestamp
-	(*v1.CursorPagination)(nil),               // 10: shared.v1.CursorPagination
-	(*v1.CursorMeta)(nil),                     // 11: shared.v1.CursorMeta
-	(*v1.OperationResponse)(nil),              // 12: shared.v1.OperationResponse
+	(v1.FileStatus)(0),                        // 10: shared.v1.FileStatus
+	(*v1.CursorPagination)(nil),               // 11: shared.v1.CursorPagination
+	(*v1.CursorMeta)(nil),                     // 12: shared.v1.CursorMeta
+	(*v1.OperationResponse)(nil),              // 13: shared.v1.OperationResponse
 }
 var file_record_v1_attachment_proto_depIdxs = []int32{
 	9,  // 0: record.v1.Attachment.expires_at:type_name -> google.protobuf.Timestamp
 	9,  // 1: record.v1.Attachment.created_at:type_name -> google.protobuf.Timestamp
 	9,  // 2: record.v1.Attachment.updated_at:type_name -> google.protobuf.Timestamp
 	9,  // 3: record.v1.Attachment.deleted_at:type_name -> google.protobuf.Timestamp
-	9,  // 4: record.v1.AttachmentServiceCreateResponse.expires_at:type_name -> google.protobuf.Timestamp
-	10, // 5: record.v1.AttachmentServiceListRequest.pagination:type_name -> shared.v1.CursorPagination
-	0,  // 6: record.v1.AttachmentServiceListResponse.attachments:type_name -> record.v1.Attachment
-	11, // 7: record.v1.AttachmentServiceListResponse.meta:type_name -> shared.v1.CursorMeta
-	0,  // 8: record.v1.AttachmentServiceFindByIdResponse.attachment:type_name -> record.v1.Attachment
-	12, // 9: record.v1.AttachmentServiceDeleteResponse.operation:type_name -> shared.v1.OperationResponse
-	1,  // 10: record.v1.AttachmentService.Create:input_type -> record.v1.AttachmentServiceCreateRequest
-	3,  // 11: record.v1.AttachmentService.List:input_type -> record.v1.AttachmentServiceListRequest
-	5,  // 12: record.v1.AttachmentService.FindById:input_type -> record.v1.AttachmentServiceFindByIdRequest
-	7,  // 13: record.v1.AttachmentService.Delete:input_type -> record.v1.AttachmentServiceDeleteRequest
-	2,  // 14: record.v1.AttachmentService.Create:output_type -> record.v1.AttachmentServiceCreateResponse
-	4,  // 15: record.v1.AttachmentService.List:output_type -> record.v1.AttachmentServiceListResponse
-	6,  // 16: record.v1.AttachmentService.FindById:output_type -> record.v1.AttachmentServiceFindByIdResponse
-	8,  // 17: record.v1.AttachmentService.Delete:output_type -> record.v1.AttachmentServiceDeleteResponse
-	14, // [14:18] is the sub-list for method output_type
-	10, // [10:14] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	10, // 4: record.v1.Attachment.upload_status:type_name -> shared.v1.FileStatus
+	9,  // 5: record.v1.AttachmentServiceCreateResponse.expires_at:type_name -> google.protobuf.Timestamp
+	11, // 6: record.v1.AttachmentServiceListRequest.pagination:type_name -> shared.v1.CursorPagination
+	0,  // 7: record.v1.AttachmentServiceListResponse.attachments:type_name -> record.v1.Attachment
+	12, // 8: record.v1.AttachmentServiceListResponse.meta:type_name -> shared.v1.CursorMeta
+	0,  // 9: record.v1.AttachmentServiceFindByIdResponse.attachment:type_name -> record.v1.Attachment
+	13, // 10: record.v1.AttachmentServiceDeleteResponse.operation:type_name -> shared.v1.OperationResponse
+	1,  // 11: record.v1.AttachmentService.Create:input_type -> record.v1.AttachmentServiceCreateRequest
+	3,  // 12: record.v1.AttachmentService.List:input_type -> record.v1.AttachmentServiceListRequest
+	5,  // 13: record.v1.AttachmentService.FindById:input_type -> record.v1.AttachmentServiceFindByIdRequest
+	7,  // 14: record.v1.AttachmentService.Delete:input_type -> record.v1.AttachmentServiceDeleteRequest
+	2,  // 15: record.v1.AttachmentService.Create:output_type -> record.v1.AttachmentServiceCreateResponse
+	4,  // 16: record.v1.AttachmentService.List:output_type -> record.v1.AttachmentServiceListResponse
+	6,  // 17: record.v1.AttachmentService.FindById:output_type -> record.v1.AttachmentServiceFindByIdResponse
+	8,  // 18: record.v1.AttachmentService.Delete:output_type -> record.v1.AttachmentServiceDeleteResponse
+	15, // [15:19] is the sub-list for method output_type
+	11, // [11:15] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_record_v1_attachment_proto_init() }

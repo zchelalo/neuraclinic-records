@@ -13,20 +13,21 @@ import (
 
 const createAttachment = `-- name: CreateAttachment :one
 INSERT INTO attachments (
-  id, file_id, mime_type, patient_id, note_id, created_at, updated_at
+  id, file_id, mime_type, patient_id, note_id, upload_status, created_at, updated_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $6
+  $1, $2, $3, $4, $5, $6, $7, $7
 )
-RETURNING id, file_id, mime_type, patient_id, note_id, created_at, updated_at, deleted_at
+RETURNING id, file_id, mime_type, patient_id, note_id, created_at, updated_at, deleted_at, upload_status
 `
 
 type CreateAttachmentParams struct {
-	ID        pgtype.UUID        `json:"id"`
-	FileID    pgtype.UUID        `json:"file_id"`
-	MimeType  string             `json:"mime_type"`
-	PatientID pgtype.UUID        `json:"patient_id"`
-	NoteID    pgtype.UUID        `json:"note_id"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID           pgtype.UUID        `json:"id"`
+	FileID       pgtype.UUID        `json:"file_id"`
+	MimeType     string             `json:"mime_type"`
+	PatientID    pgtype.UUID        `json:"patient_id"`
+	NoteID       pgtype.UUID        `json:"note_id"`
+	UploadStatus string             `json:"upload_status"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateAttachment(ctx context.Context, arg CreateAttachmentParams) (Attachment, error) {
@@ -36,6 +37,7 @@ func (q *Queries) CreateAttachment(ctx context.Context, arg CreateAttachmentPara
 		arg.MimeType,
 		arg.PatientID,
 		arg.NoteID,
+		arg.UploadStatus,
 		arg.CreatedAt,
 	)
 	var i Attachment
@@ -48,6 +50,7 @@ func (q *Queries) CreateAttachment(ctx context.Context, arg CreateAttachmentPara
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+		&i.UploadStatus,
 	)
 	return i, err
 }
@@ -78,7 +81,7 @@ func (q *Queries) DeleteAttachment(ctx context.Context, arg DeleteAttachmentPara
 }
 
 const getAttachmentByID = `-- name: GetAttachmentByID :one
-SELECT att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at
+SELECT att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at, att.upload_status
 FROM attachments att
 JOIN patients p ON p.id = att.patient_id
 WHERE att.id = $1
@@ -104,12 +107,13 @@ func (q *Queries) GetAttachmentByID(ctx context.Context, arg GetAttachmentByIDPa
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+		&i.UploadStatus,
 	)
 	return i, err
 }
 
 const listAttachments = `-- name: ListAttachments :many
-SELECT att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at
+SELECT att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at, att.upload_status
 FROM attachments att
 JOIN patients p ON p.id = att.patient_id
 WHERE p.psychologist_id = $1
@@ -167,6 +171,7 @@ func (q *Queries) ListAttachments(ctx context.Context, arg ListAttachmentsParams
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
+			&i.UploadStatus,
 		); err != nil {
 			return nil, err
 		}
@@ -176,4 +181,35 @@ func (q *Queries) ListAttachments(ctx context.Context, arg ListAttachmentsParams
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateAttachmentUploadStatusByFileID = `-- name: UpdateAttachmentUploadStatusByFileID :one
+UPDATE attachments att
+SET upload_status = $2, updated_at = $3
+WHERE att.file_id = $1
+  AND att.deleted_at IS NULL
+RETURNING att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at, att.upload_status
+`
+
+type UpdateAttachmentUploadStatusByFileIDParams struct {
+	FileID       pgtype.UUID        `json:"file_id"`
+	UploadStatus string             `json:"upload_status"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) UpdateAttachmentUploadStatusByFileID(ctx context.Context, arg UpdateAttachmentUploadStatusByFileIDParams) (Attachment, error) {
+	row := q.db.QueryRow(ctx, updateAttachmentUploadStatusByFileID, arg.FileID, arg.UploadStatus, arg.UpdatedAt)
+	var i Attachment
+	err := row.Scan(
+		&i.ID,
+		&i.FileID,
+		&i.MimeType,
+		&i.PatientID,
+		&i.NoteID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.UploadStatus,
+	)
+	return i, err
 }

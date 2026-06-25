@@ -29,6 +29,14 @@ type Config struct {
 	GRPCTLSCertPath string
 	GRPCTLSKeyPath  string
 
+	RabbitMQURL        string
+	RabbitMQExchange   string
+	RabbitMQQueue      string
+	RabbitMQRoutingKey string
+	RabbitMQDLX        string
+	RabbitMQDLQ        string
+	RabbitMQPrefetch   int
+
 	FileManagementGRPCAddr               string
 	FileManagementGRPCTLSEnabled         bool
 	FileManagementGRPCCACertPath         string
@@ -55,6 +63,13 @@ func LoadConfig(dotenvPath string) (Config, error) {
 		DBSSLMode:                            getEnv("DB_SSLMODE", "disable"),
 		GRPCTLSCertPath:                      getEnv("GRPC_TLS_CERT_PATH", ""),
 		GRPCTLSKeyPath:                       getEnv("GRPC_TLS_KEY_PATH", ""),
+		RabbitMQURL:                          getEnv("RABBITMQ_URL", ""),
+		RabbitMQExchange:                     getEnv("RABBITMQ_EXCHANGE", "neuraclinic.events"),
+		RabbitMQQueue:                        getEnv("RABBITMQ_QUEUE", "records.file_status_changed.v1"),
+		RabbitMQRoutingKey:                   getEnv("RABBITMQ_ROUTING_KEY", "file.record.status_changed.v1"),
+		RabbitMQDLX:                          getEnv("RABBITMQ_DLX", "neuraclinic.records.dlx"),
+		RabbitMQDLQ:                          getEnv("RABBITMQ_DLQ", "records.file_status_changed.v1.dlq"),
+		RabbitMQPrefetch:                     getEnvInt("RABBITMQ_PREFETCH", 10),
 		FileManagementGRPCAddr:               getEnv("FILE_MANAGEMENT_GRPC_ADDR", ""),
 		FileManagementGRPCTLSEnabled:         getEnvBool("FILE_MANAGEMENT_GRPC_TLS_ENABLED", true),
 		FileManagementGRPCCACertPath:         getEnv("FILE_MANAGEMENT_GRPC_CA_CERT_PATH", ""),
@@ -91,6 +106,7 @@ func (c Config) Validate() error {
 		"DB_NAME":                   c.DBName,
 		"GRPC_TLS_CERT_PATH":        c.GRPCTLSCertPath,
 		"GRPC_TLS_KEY_PATH":         c.GRPCTLSKeyPath,
+		"RABBITMQ_URL":              c.RabbitMQURL,
 		"FILE_MANAGEMENT_GRPC_ADDR": c.FileManagementGRPCAddr,
 	}
 
@@ -111,6 +127,9 @@ func (c Config) Validate() error {
 	}
 	if c.PaginationLimitMax < c.PaginationLimitDefault {
 		return fmt.Errorf("PAGINATION_LIMIT_MAX must be greater than or equal to PAGINATION_LIMIT_DEFAULT")
+	}
+	if c.RabbitMQPrefetch <= 0 {
+		return fmt.Errorf("RABBITMQ_PREFETCH must be greater than zero")
 	}
 
 	return nil

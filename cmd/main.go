@@ -20,15 +20,22 @@ func main() {
 	logger := bootstrap.GetLogger()
 	defer bootstrap.SyncLogger()
 
-	app, err := bootstrap.InitApp(context.Background(), logger, cfg)
+	rootCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	app, err := bootstrap.InitApp(rootCtx, logger, cfg)
 	if err != nil {
 		logger.Fatal("cannot initialize application", zap.Error(err))
 	}
 
-	errCh := make(chan error, 1)
+	errCh := make(chan error, 2)
 	go func() {
 		logger.Info("grpc server starting", zap.Int("port", cfg.Port))
 		errCh <- app.Server.Start()
+	}()
+	go func() {
+		logger.Info("rabbitmq consumer starting", zap.String("queue", cfg.RabbitMQQueue))
+		errCh <- app.Consumer.Run(rootCtx)
 	}()
 
 	sigs := make(chan os.Signal, 1)
@@ -38,8 +45,12 @@ func main() {
 	case sig := <-sigs:
 		logger.Info("signal received, shutting down", zap.String("signal", sig.String()))
 	case err := <-errCh:
-		logger.Error("grpc server stopped", zap.Error(err))
+		if err != nil {
+			logger.Error("worker stopped", zap.Error(err))
+		}
 	}
+
+	cancel()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

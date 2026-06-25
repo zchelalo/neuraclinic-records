@@ -2,9 +2,11 @@ package findattachment
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/google/uuid"
+	sharedv1 "github.com/zchelalo/neuraclinic-records/gen/go/shared/v1"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/domain"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/ports"
 	recorderrors "github.com/zchelalo/neuraclinic-records/internal/shared/recorderrors"
@@ -35,9 +37,15 @@ func (uc *UseCase) Execute(ctx context.Context, cmd Command) (domain.Attachment,
 	if err != nil {
 		return domain.Attachment{}, err
 	}
+	if attachment.UploadStatus != sharedv1.FileStatus_FILE_STATUS_AVAILABLE {
+		return attachment, nil
+	}
 	if isViewable(attachment.MimeType) {
 		url, expiresAt, err := uc.files.GenerateDownloadURL(ctx, attachment.FileID)
 		if err != nil {
+			if errors.Is(err, recorderrors.ErrFailedPrecondition) {
+				return attachment, nil
+			}
 			return domain.Attachment{}, err
 		}
 		attachment.DownloadURL = &url

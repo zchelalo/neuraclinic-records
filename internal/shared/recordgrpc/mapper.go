@@ -165,12 +165,13 @@ func FamilyogramToProto(familyogram familyogramdomain.Familyogram) *recordv1.Fam
 
 func AttachmentToProto(attachment attachmentdomain.Attachment) *recordv1.Attachment {
 	resp := &recordv1.Attachment{
-		Id:        attachment.ID.String(),
-		FileId:    attachment.FileID.String(),
-		MimeType:  attachment.MimeType,
-		PatientId: attachment.PatientID.String(),
-		CreatedAt: timestamppb.New(attachment.CreatedAt),
-		UpdatedAt: timestamppb.New(attachment.UpdatedAt),
+		Id:           attachment.ID.String(),
+		FileId:       attachment.FileID.String(),
+		MimeType:     attachment.MimeType,
+		UploadStatus: attachment.UploadStatus,
+		PatientId:    attachment.PatientID.String(),
+		CreatedAt:    timestamppb.New(attachment.CreatedAt),
+		UpdatedAt:    timestamppb.New(attachment.UpdatedAt),
 	}
 	if attachment.DownloadURL != nil {
 		resp.DownloadUrl = attachment.DownloadURL

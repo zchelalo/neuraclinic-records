@@ -2,9 +2,11 @@ package listattachments
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/google/uuid"
+	sharedv1 "github.com/zchelalo/neuraclinic-records/gen/go/shared/v1"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/domain"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/ports"
 	appshared "github.com/zchelalo/neuraclinic-records/internal/shared/recordapp"
@@ -56,11 +58,17 @@ func (uc *UseCase) Execute(ctx context.Context, cmd Command) (domain.AttachmentL
 		return domain.AttachmentList{}, err
 	}
 	for i := range result.Attachments {
+		if result.Attachments[i].UploadStatus != sharedv1.FileStatus_FILE_STATUS_AVAILABLE {
+			continue
+		}
 		if !isViewable(result.Attachments[i].MimeType) {
 			continue
 		}
 		url, expiresAt, err := uc.files.GenerateDownloadURL(ctx, result.Attachments[i].FileID)
 		if err != nil {
+			if errors.Is(err, recorderrors.ErrFailedPrecondition) {
+				continue
+			}
 			return domain.AttachmentList{}, err
 		}
 		result.Attachments[i].DownloadURL = &url

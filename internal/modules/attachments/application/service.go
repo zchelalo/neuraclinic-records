@@ -8,6 +8,7 @@ import (
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/application/deleteattachment"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/application/findattachment"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/application/listattachments"
+	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/application/processfilestatus"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/domain"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/attachments/ports"
 	appshared "github.com/zchelalo/neuraclinic-records/internal/shared/recordapp"
@@ -17,10 +18,11 @@ type Config = appshared.Config
 type Runtime = appshared.Runtime
 
 type Service struct {
-	createAttachment *createattachment.UseCase
-	listAttachments  *listattachments.UseCase
-	findAttachment   *findattachment.UseCase
-	deleteAttachment *deleteattachment.UseCase
+	createAttachment  *createattachment.UseCase
+	listAttachments   *listattachments.UseCase
+	findAttachment    *findattachment.UseCase
+	deleteAttachment  *deleteattachment.UseCase
+	processFileStatus *processfilestatus.UseCase
 }
 
 func NewService(cfg Config, repo ports.Repository, files ports.FileManagementClient) *Service {
@@ -30,10 +32,11 @@ func NewService(cfg Config, repo ports.Repository, files ports.FileManagementCli
 func NewServiceWithRuntime(cfg Config, repo ports.Repository, files ports.FileManagementClient, runtime Runtime) *Service {
 	runtime = runtime.Normalize()
 	return &Service{
-		createAttachment: createattachment.New(repo, files, runtime),
-		listAttachments:  listattachments.New(cfg, repo, files),
-		findAttachment:   findattachment.New(repo, files),
-		deleteAttachment: deleteattachment.New(repo, runtime),
+		createAttachment:  createattachment.New(repo, files, runtime),
+		listAttachments:   listattachments.New(cfg, repo, files),
+		findAttachment:    findattachment.New(repo, files),
+		deleteAttachment:  deleteattachment.New(repo, runtime),
+		processFileStatus: processfilestatus.New(repo, runtime),
 	}
 }
 
@@ -55,6 +58,10 @@ func (s *Service) FindAttachment(ctx context.Context, psychologistID, id uuid.UU
 
 func (s *Service) DeleteAttachment(ctx context.Context, psychologistID, id uuid.UUID) error {
 	return s.deleteAttachment.Execute(ctx, deleteattachment.Command{PsychologistID: psychologistID, ID: id})
+}
+
+func (s *Service) ProcessFileStatusChanged(ctx context.Context, cmd processfilestatus.Command) (domain.Attachment, error) {
+	return s.processFileStatus.Execute(ctx, cmd)
 }
 
 type AttachmentCreateCommand = createattachment.Command

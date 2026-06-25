@@ -1,8 +1,8 @@
 -- name: CreateAttachment :one
 INSERT INTO attachments (
-  id, file_id, mime_type, patient_id, note_id, created_at, updated_at
+  id, file_id, mime_type, patient_id, note_id, upload_status, created_at, updated_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $6
+  $1, $2, $3, $4, $5, $6, $7, $7
 )
 RETURNING *;
 
@@ -46,3 +46,10 @@ WHERE p.id = att.patient_id
   AND p.psychologist_id = $2
   AND att.deleted_at IS NULL
   AND p.deleted_at IS NULL;
+
+-- name: UpdateAttachmentUploadStatusByFileID :one
+UPDATE attachments att
+SET upload_status = $2, updated_at = $3
+WHERE att.file_id = $1
+  AND att.deleted_at IS NULL
+RETURNING att.*;
