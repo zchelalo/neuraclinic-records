@@ -1,6 +1,7 @@
 package recordgrpc
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -11,6 +12,8 @@ import (
 	familiogramdomain "github.com/zchelalo/neuraclinic-records/internal/modules/familiogram/domain"
 	notedomain "github.com/zchelalo/neuraclinic-records/internal/modules/notes/domain"
 	patientdomain "github.com/zchelalo/neuraclinic-records/internal/modules/patients/domain"
+	"github.com/zchelalo/neuraclinic-records/internal/shared/appctx"
+	"github.com/zchelalo/neuraclinic-records/internal/shared/i18n"
 	appshared "github.com/zchelalo/neuraclinic-records/internal/shared/recordapp"
 	date "google.golang.org/genproto/googleapis/type/date"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -208,6 +211,6 @@ func CursorPaginationFromProto(p *sharedv1.CursorPagination) appshared.CursorPag
 	}
 }
 
-func Operation(message string) *sharedv1.OperationResponse {
-	return &sharedv1.OperationResponse{Message: message}
+func Operation(ctx context.Context, key string) *sharedv1.OperationResponse {
+	return &sharedv1.OperationResponse{Message: i18n.Message(appctx.Language(ctx), key)}
 }

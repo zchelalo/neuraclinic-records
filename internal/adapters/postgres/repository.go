@@ -483,6 +483,13 @@ func (r *Repository) NoteBelongsToPatient(ctx context.Context, psychologistID, n
 	})
 }
 
+func (r *Repository) NoteExists(ctx context.Context, psychologistID, id uuid.UUID) (bool, error) {
+	return r.q.NoteExists(ctx, recordsdb.NoteExistsParams{
+		ID:             pgutil.UUID(id),
+		PsychologistID: pgutil.UUID(psychologistID),
+	})
+}
+
 func (r *Repository) CreateAttachment(ctx context.Context, attachment attachmentdomain.AttachmentCreate, fileID uuid.UUID) (attachmentdomain.Attachment, error) {
 	row, err := r.q.CreateAttachment(ctx, recordsdb.CreateAttachmentParams{
 		ID:           pgutil.UUID(attachment.ID),

@@ -26,6 +26,7 @@ const (
 	headerAdminID        = "x-admin-id"
 	headerRequestID      = "x-request-id"
 	headerTraceID        = "x-trace-id"
+	headerAcceptLanguage = "accept-language"
 )
 
 type Config struct {
@@ -103,7 +104,7 @@ func forwardMetadata(ctx context.Context) context.Context {
 		return ctx
 	}
 	out := metadata.MD{}
-	for _, key := range []string{headerUserID, headerPsychologistID, headerAdminID, headerRequestID, headerTraceID} {
+	for _, key := range []string{headerUserID, headerPsychologistID, headerAdminID, headerRequestID, headerTraceID, headerAcceptLanguage} {
 		if values := incoming.Get(key); len(values) > 0 {
 			out.Set(key, values...)
 		}

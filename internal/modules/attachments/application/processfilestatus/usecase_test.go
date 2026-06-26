@@ -98,6 +98,10 @@ func (r *processRepo) PatientExists(context.Context, uuid.UUID, uuid.UUID) (bool
 	panic("unexpected call")
 }
 
+func (r *processRepo) NoteExists(context.Context, uuid.UUID, uuid.UUID) (bool, error) {
+	panic("unexpected call")
+}
+
 func (r *processRepo) NoteBelongsToPatient(context.Context, uuid.UUID, uuid.UUID, uuid.UUID) (bool, error) {
 	panic("unexpected call")
 }

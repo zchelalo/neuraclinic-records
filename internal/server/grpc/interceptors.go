@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/zchelalo/neuraclinic-records/internal/shared/appctx"
+	"github.com/zchelalo/neuraclinic-records/internal/shared/i18n"
 	"github.com/zchelalo/neuraclinic-records/internal/shared/uuidx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -17,6 +18,7 @@ import (
 const (
 	headerRequestID      = "x-request-id"
 	headerTraceID        = "x-trace-id"
+	headerAcceptLanguage = "accept-language"
 	headerUserID         = "x-user-id"
 	headerPsychologistID = "x-psychologist-id"
 	headerAdminID        = "x-admin-id"
@@ -33,6 +35,7 @@ func UnaryInterceptor(baseLogger *zap.Logger, serviceName string) grpc.UnaryServ
 		if traceID == "" {
 			traceID = uuidx.NewString()
 		}
+		language := i18n.Normalize(metadataValue(ctx, headerAcceptLanguage))
 
 		logger := baseLogger.With(
 			zap.String("service", serviceName),
@@ -44,6 +47,7 @@ func UnaryInterceptor(baseLogger *zap.Logger, serviceName string) grpc.UnaryServ
 		ctx = appctx.WithLogger(ctx, logger)
 		ctx = appctx.WithRequestID(ctx, requestID)
 		ctx = appctx.WithTraceID(ctx, traceID)
+		ctx = appctx.WithLanguage(ctx, language)
 		ctx = withOptionalUUID(ctx, headerUserID, appctx.WithUserID)
 		ctx = withOptionalUUID(ctx, headerPsychologistID, appctx.WithPsychologistID)
 		ctx = withOptionalUUID(ctx, headerAdminID, appctx.WithAdminID)
@@ -51,7 +55,7 @@ func UnaryInterceptor(baseLogger *zap.Logger, serviceName string) grpc.UnaryServ
 		defer func() {
 			if recovered := recover(); recovered != nil {
 				logger.Error("panic recovered", zap.Any("panic", recovered))
-				err = status.Error(codes.Internal, "internal server error")
+				err = status.Error(codes.Internal, i18n.Message(appctx.Language(ctx), i18n.KeyInternalServerError))
 			}
 
 			code := status.Code(err)

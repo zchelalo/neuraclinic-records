@@ -99,3 +99,14 @@ SELECT EXISTS (
     AND n.deleted_at IS NULL
     AND p.deleted_at IS NULL
 ) AS exists;
+
+-- name: NoteExists :one
+SELECT EXISTS (
+  SELECT 1
+  FROM notes n
+  JOIN patients p ON p.id = n.patient_id
+  WHERE n.id = $1
+    AND p.psychologist_id = $2
+    AND n.deleted_at IS NULL
+    AND p.deleted_at IS NULL
+) AS exists;

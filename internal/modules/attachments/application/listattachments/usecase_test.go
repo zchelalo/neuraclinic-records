@@ -90,6 +90,10 @@ func (r *listRepo) PatientExists(context.Context, uuid.UUID, uuid.UUID) (bool, e
 	return r.patientExists, nil
 }
 
+func (r *listRepo) NoteExists(context.Context, uuid.UUID, uuid.UUID) (bool, error) {
+	panic("unexpected call")
+}
+
 func (r *listRepo) NoteBelongsToPatient(context.Context, uuid.UUID, uuid.UUID, uuid.UUID) (bool, error) {
 	panic("unexpected call")
 }

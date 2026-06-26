@@ -13,14 +13,14 @@ import (
 func (s *AppointmentService) Create(ctx context.Context, req *recordv1.AppointmentServiceCreateRequest) (*recordv1.AppointmentServiceCreateResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	patientID, err := recordgrpc.ParseID(req.GetPatientId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	if req.GetStartTime() == nil || req.GetEndTime() == nil {
-		return nil, recordgrpc.MapError(recorderrors.ErrInvalidInput)
+		return nil, recordgrpc.MapError(ctx, recorderrors.ErrInvalidInput)
 	}
 	appointment, err := s.app.CreateAppointment(ctx, application.AppointmentCreateCommand{
 		PsychologistID: psychologistID,
@@ -30,7 +30,7 @@ func (s *AppointmentService) Create(ctx context.Context, req *recordv1.Appointme
 		PatientID:      patientID,
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.AppointmentServiceCreateResponse{Appointment: recordgrpc.AppointmentToProto(appointment)}, nil
 }
@@ -38,15 +38,15 @@ func (s *AppointmentService) Create(ctx context.Context, req *recordv1.Appointme
 func (s *AppointmentService) FindById(ctx context.Context, req *recordv1.AppointmentServiceFindByIdRequest) (*recordv1.AppointmentServiceFindByIdResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetAppointmentId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	appointment, err := s.app.FindAppointment(ctx, psychologistID, id)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.AppointmentServiceFindByIdResponse{Appointment: recordgrpc.AppointmentToProto(appointment)}, nil
 }
@@ -54,11 +54,11 @@ func (s *AppointmentService) FindById(ctx context.Context, req *recordv1.Appoint
 func (s *AppointmentService) List(ctx context.Context, req *recordv1.AppointmentServiceListRequest) (*recordv1.AppointmentServiceListResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	patientID, err := recordgrpc.ParseOptionalID(req.PatientId)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	var startDate, endDate *time.Time
 	if req.GetDateRange() != nil {
@@ -80,7 +80,7 @@ func (s *AppointmentService) List(ctx context.Context, req *recordv1.Appointment
 		Statuses:       req.GetStatuses(),
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	appointments := make([]*recordv1.Appointment, 0, len(result.Appointments))
 	for _, appointment := range result.Appointments {
@@ -95,14 +95,14 @@ func (s *AppointmentService) List(ctx context.Context, req *recordv1.Appointment
 func (s *AppointmentService) Reschedule(ctx context.Context, req *recordv1.AppointmentServiceRescheduleRequest) (*recordv1.AppointmentServiceRescheduleResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetAppointmentId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	if req.GetNewStartTime() == nil || req.GetNewEndTime() == nil {
-		return nil, recordgrpc.MapError(recorderrors.ErrInvalidInput)
+		return nil, recordgrpc.MapError(ctx, recorderrors.ErrInvalidInput)
 	}
 	appointment, err := s.app.RescheduleAppointment(ctx, application.AppointmentRescheduleCommand{
 		PsychologistID: psychologistID,
@@ -112,7 +112,7 @@ func (s *AppointmentService) Reschedule(ctx context.Context, req *recordv1.Appoi
 		Reason:         req.GetReason(),
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.AppointmentServiceRescheduleResponse{Appointment: recordgrpc.AppointmentToProto(appointment)}, nil
 }
@@ -120,15 +120,15 @@ func (s *AppointmentService) Reschedule(ctx context.Context, req *recordv1.Appoi
 func (s *AppointmentService) UpdateStatus(ctx context.Context, req *recordv1.AppointmentServiceUpdateStatusRequest) (*recordv1.AppointmentServiceUpdateStatusResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetAppointmentId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	cancelledByUserID, err := recordgrpc.ParseOptionalID(req.CancelledByUserId)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	appointment, err := s.app.UpdateAppointmentStatus(ctx, application.AppointmentStatusUpdateCommand{
 		PsychologistID:    psychologistID,
@@ -137,7 +137,7 @@ func (s *AppointmentService) UpdateStatus(ctx context.Context, req *recordv1.App
 		CancelledByUserID: cancelledByUserID,
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.AppointmentServiceUpdateStatusResponse{Appointment: recordgrpc.AppointmentToProto(appointment)}, nil
 }

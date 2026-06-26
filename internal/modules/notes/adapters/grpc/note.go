@@ -6,21 +6,22 @@ import (
 
 	recordv1 "github.com/zchelalo/neuraclinic-records/gen/go/record/v1"
 	"github.com/zchelalo/neuraclinic-records/internal/modules/notes/application"
+	"github.com/zchelalo/neuraclinic-records/internal/shared/i18n"
 	recordgrpc "github.com/zchelalo/neuraclinic-records/internal/shared/recordgrpc"
 )
 
 func (s *NoteService) Create(ctx context.Context, req *recordv1.NoteServiceCreateRequest) (*recordv1.NoteServiceCreateResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	patientID, err := recordgrpc.ParseID(req.GetPatientId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	appointmentID, err := recordgrpc.ParseOptionalID(req.AppointmentId)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	note, err := s.app.CreateNote(ctx, application.NoteCreateCommand{
 		PsychologistID: psychologistID,
@@ -31,7 +32,7 @@ func (s *NoteService) Create(ctx context.Context, req *recordv1.NoteServiceCreat
 		ContentText:    req.GetContentText(),
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.NoteServiceCreateResponse{Note: recordgrpc.NoteToProto(note)}, nil
 }
@@ -39,11 +40,11 @@ func (s *NoteService) Create(ctx context.Context, req *recordv1.NoteServiceCreat
 func (s *NoteService) List(ctx context.Context, req *recordv1.NoteServiceListRequest) (*recordv1.NoteServiceListResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	patientID, err := recordgrpc.ParseID(req.GetPatientId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	var startDate, endDate *time.Time
 	if req.GetCreatedAtRange() != nil {
@@ -67,7 +68,7 @@ func (s *NoteService) List(ctx context.Context, req *recordv1.NoteServiceListReq
 		SearchQuery:               req.GetSearchQuery(),
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	resp := make([]*recordv1.NoteSummary, 0, len(result.Notes))
 	for _, note := range result.Notes {
@@ -82,15 +83,15 @@ func (s *NoteService) List(ctx context.Context, req *recordv1.NoteServiceListReq
 func (s *NoteService) FindById(ctx context.Context, req *recordv1.NoteServiceFindByIdRequest) (*recordv1.NoteServiceFindByIdResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	note, err := s.app.FindNote(ctx, psychologistID, id)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.NoteServiceFindByIdResponse{Note: recordgrpc.NoteToProto(note)}, nil
 }
@@ -98,15 +99,15 @@ func (s *NoteService) FindById(ctx context.Context, req *recordv1.NoteServiceFin
 func (s *NoteService) Update(ctx context.Context, req *recordv1.NoteServiceUpdateRequest) (*recordv1.NoteServiceUpdateResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	appointmentID, err := recordgrpc.ParseOptionalID(req.AppointmentId)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	note, err := s.app.UpdateNote(ctx, application.NoteUpdateCommand{
 		PsychologistID: psychologistID,
@@ -117,7 +118,7 @@ func (s *NoteService) Update(ctx context.Context, req *recordv1.NoteServiceUpdat
 		ContentText:    req.ContentText,
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.NoteServiceUpdateResponse{Note: recordgrpc.NoteToProto(note)}, nil
 }
@@ -125,14 +126,14 @@ func (s *NoteService) Update(ctx context.Context, req *recordv1.NoteServiceUpdat
 func (s *NoteService) Delete(ctx context.Context, req *recordv1.NoteServiceDeleteRequest) (*recordv1.NoteServiceDeleteResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	if err := s.app.DeleteNote(ctx, psychologistID, id); err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
-	return &recordv1.NoteServiceDeleteResponse{Operation: recordgrpc.Operation("note deleted")}, nil
+	return &recordv1.NoteServiceDeleteResponse{Operation: recordgrpc.Operation(ctx, i18n.KeyNoteDeleted)}, nil
 }

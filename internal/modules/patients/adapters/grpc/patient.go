@@ -13,11 +13,11 @@ import (
 func (s *PatientService) Create(ctx context.Context, req *recordv1.PatientServiceCreateRequest) (*recordv1.PatientServiceCreateResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	birthDate, err := recordgrpc.TimeFromProtoDate(req.GetBirthDate())
 	if err != nil {
-		return nil, recordgrpc.MapError(recorderrors.ErrInvalidInput)
+		return nil, recordgrpc.MapError(ctx, recorderrors.ErrInvalidInput)
 	}
 	patient, err := s.app.CreatePatient(ctx, application.PatientCreateCommand{
 		PsychologistID: psychologistID,
@@ -45,7 +45,7 @@ func (s *PatientService) Create(ctx context.Context, req *recordv1.PatientServic
 		UnitNumber:     req.UnitNumber,
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.PatientServiceCreateResponse{Patient: recordgrpc.PatientSummaryToProto(patient)}, nil
 }
@@ -53,7 +53,7 @@ func (s *PatientService) Create(ctx context.Context, req *recordv1.PatientServic
 func (s *PatientService) List(ctx context.Context, req *recordv1.PatientServiceListRequest) (*recordv1.PatientServiceListResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	result, err := s.app.ListPatients(ctx, application.PatientListCommand{
 		PsychologistID:          psychologistID,
@@ -64,7 +64,7 @@ func (s *PatientService) List(ctx context.Context, req *recordv1.PatientServiceL
 		SearchQuery:             req.GetSearchQuery(),
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	patients := make([]*recordv1.PatientSummary, 0, len(result.Patients))
 	for _, patient := range result.Patients {
@@ -79,15 +79,15 @@ func (s *PatientService) List(ctx context.Context, req *recordv1.PatientServiceL
 func (s *PatientService) FindById(ctx context.Context, req *recordv1.PatientServiceFindByIdRequest) (*recordv1.PatientServiceFindByIdResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	patient, err := s.app.FindPatient(ctx, psychologistID, id)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.PatientServiceFindByIdResponse{Patient: recordgrpc.PatientToProto(patient)}, nil
 }
@@ -95,17 +95,17 @@ func (s *PatientService) FindById(ctx context.Context, req *recordv1.PatientServ
 func (s *PatientService) UpdateIdentificationData(ctx context.Context, req *recordv1.PatientServiceUpdateIdentificationDataRequest) (*recordv1.PatientServiceUpdateIdentificationDataResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	var birthDate *time.Time
 	if req.BirthDate != nil {
 		parsed, err := recordgrpc.TimeFromProtoDate(req.BirthDate)
 		if err != nil {
-			return nil, recordgrpc.MapError(recorderrors.ErrInvalidInput)
+			return nil, recordgrpc.MapError(ctx, recorderrors.ErrInvalidInput)
 		}
 		birthDate = &parsed
 	}
@@ -126,7 +126,7 @@ func (s *PatientService) UpdateIdentificationData(ctx context.Context, req *reco
 		Religion:       req.Religion,
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.PatientServiceUpdateIdentificationDataResponse{Patient: recordgrpc.PatientToProto(patient)}, nil
 }
@@ -134,11 +134,11 @@ func (s *PatientService) UpdateIdentificationData(ctx context.Context, req *reco
 func (s *PatientService) UpdateContactDetails(ctx context.Context, req *recordv1.PatientServiceUpdateContactDetailsRequest) (*recordv1.PatientServiceUpdateContactDetailsResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	patient, err := s.app.UpdatePatientContact(ctx, application.PatientContactUpdateCommand{
 		PsychologistID: psychologistID,
@@ -147,7 +147,7 @@ func (s *PatientService) UpdateContactDetails(ctx context.Context, req *recordv1
 		Email:          req.Email,
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.PatientServiceUpdateContactDetailsResponse{Patient: recordgrpc.PatientToProto(patient)}, nil
 }
@@ -155,11 +155,11 @@ func (s *PatientService) UpdateContactDetails(ctx context.Context, req *recordv1
 func (s *PatientService) UpdateAddress(ctx context.Context, req *recordv1.PatientServiceUpdateAddressRequest) (*recordv1.PatientServiceUpdateAddressResponse, error) {
 	psychologistID, err := recordgrpc.PsychologistID(ctx)
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	id, err := recordgrpc.ParseID(req.GetId())
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	patient, err := s.app.UpdatePatientAddress(ctx, application.PatientAddressUpdateCommand{
 		PsychologistID: psychologistID,
@@ -174,7 +174,7 @@ func (s *PatientService) UpdateAddress(ctx context.Context, req *recordv1.Patien
 		UnitNumber:     req.UnitNumber,
 	})
 	if err != nil {
-		return nil, recordgrpc.MapError(err)
+		return nil, recordgrpc.MapError(ctx, err)
 	}
 	return &recordv1.PatientServiceUpdateAddressResponse{Patient: recordgrpc.PatientToProto(patient)}, nil
 }

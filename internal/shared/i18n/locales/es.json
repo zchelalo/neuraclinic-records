@@ -1,0 +1,13 @@
+{
+  "messages": {
+    "missing_credentials": "faltan credenciales",
+    "forbidden": "acceso denegado",
+    "not_found": "recurso no encontrado",
+    "invalid_input": "entrada invalida",
+    "conflict": "conflicto",
+    "failed_precondition": "precondicion fallida",
+    "internal_server_error": "error interno del servidor",
+    "note_deleted": "nota eliminada",
+    "attachment_deleted": "adjunto eliminado"
+  }
+}

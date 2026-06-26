@@ -17,6 +17,7 @@ type Repository interface {
 	UpdateAttachmentUploadStatusByFileID(ctx context.Context, fileID uuid.UUID, status sharedv1.FileStatus, now time.Time) (domain.Attachment, error)
 	DeleteAttachment(ctx context.Context, psychologistID, id uuid.UUID, now time.Time) error
 	PatientExists(ctx context.Context, psychologistID, id uuid.UUID) (bool, error)
+	NoteExists(ctx context.Context, psychologistID, id uuid.UUID) (bool, error)
 	NoteBelongsToPatient(ctx context.Context, psychologistID, noteID, patientID uuid.UUID) (bool, error)
 }
 

@@ -1,0 +1,13 @@
+{
+  "messages": {
+    "missing_credentials": "missing credentials",
+    "forbidden": "forbidden",
+    "not_found": "not found",
+    "invalid_input": "invalid input",
+    "conflict": "conflict",
+    "failed_precondition": "failed precondition",
+    "internal_server_error": "internal server error",
+    "note_deleted": "note deleted",
+    "attachment_deleted": "attachment deleted"
+  }
+}

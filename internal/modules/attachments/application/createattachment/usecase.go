@@ -49,6 +49,13 @@ func (uc *UseCase) Execute(ctx context.Context, cmd Command) (domain.AttachmentC
 		return domain.AttachmentCreateResult{}, recorderrors.ErrNotFound
 	}
 	if cmd.NoteID != nil {
+		exists, err := uc.repo.NoteExists(ctx, cmd.PsychologistID, *cmd.NoteID)
+		if err != nil {
+			return domain.AttachmentCreateResult{}, err
+		}
+		if !exists {
+			return domain.AttachmentCreateResult{}, recorderrors.ErrNotFound
+		}
 		ok, err := uc.repo.NoteBelongsToPatient(ctx, cmd.PsychologistID, *cmd.NoteID, cmd.PatientID)
 		if err != nil {
 			return domain.AttachmentCreateResult{}, err
