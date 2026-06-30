@@ -494,6 +494,7 @@ func (r *Repository) CreateAttachment(ctx context.Context, attachment attachment
 	row, err := r.q.CreateAttachment(ctx, recordsdb.CreateAttachmentParams{
 		ID:           pgutil.UUID(attachment.ID),
 		FileID:       pgutil.UUID(fileID),
+		OriginalName: attachment.OriginalName,
 		MimeType:     attachment.MimeType,
 		PatientID:    pgutil.UUID(attachment.PatientID),
 		NoteID:       pgutil.OptionalUUID(attachment.NoteID),
@@ -700,6 +701,7 @@ func attachmentFromRow(row recordsdb.Attachment) attachmentdomain.Attachment {
 	return attachmentdomain.Attachment{
 		ID:           pgutil.UUIDValue(row.ID),
 		FileID:       pgutil.UUIDValue(row.FileID),
+		OriginalName: row.OriginalName,
 		MimeType:     row.MimeType,
 		UploadStatus: parseFileStatus(row.UploadStatus),
 		PatientID:    pgutil.UUIDValue(row.PatientID),

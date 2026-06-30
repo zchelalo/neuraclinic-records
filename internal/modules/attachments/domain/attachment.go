@@ -11,6 +11,7 @@ import (
 type Attachment struct {
 	ID           uuid.UUID
 	FileID       uuid.UUID
+	OriginalName string
 	MimeType     string
 	UploadStatus sharedv1.FileStatus
 	DownloadURL  *string

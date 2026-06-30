@@ -36,6 +36,7 @@ type Attachment struct {
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
 	UploadStatus  v1.FileStatus          `protobuf:"varint,11,opt,name=upload_status,json=uploadStatus,proto3,enum=shared.v1.FileStatus" json:"upload_status,omitempty"`
+	OriginalName  string                 `protobuf:"bytes,12,opt,name=original_name,json=originalName,proto3" json:"original_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -145,6 +146,13 @@ func (x *Attachment) GetUploadStatus() v1.FileStatus {
 		return x.UploadStatus
 	}
 	return v1.FileStatus(0)
+}
+
+func (x *Attachment) GetOriginalName() string {
+	if x != nil {
+		return x.OriginalName
+	}
+	return ""
 }
 
 type AttachmentServiceCreateRequest struct {
@@ -583,7 +591,7 @@ var File_record_v1_attachment_proto protoreflect.FileDescriptor
 
 const file_record_v1_attachment_proto_rawDesc = "" +
 	"\n" +
-	"\x1arecord/v1/attachment.proto\x12\trecord.v1\x1a\x16shared/v1/shared.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa4\x04\n" +
+	"\x1arecord/v1/attachment.proto\x12\trecord.v1\x1a\x16shared/v1/shared.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc9\x04\n" +
 	"\n" +
 	"Attachment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
@@ -602,7 +610,8 @@ const file_record_v1_attachment_proto_rawDesc = "" +
 	"\n" +
 	"deleted_at\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampH\x03R\tdeletedAt\x88\x01\x01\x12:\n" +
-	"\rupload_status\x18\v \x01(\x0e2\x15.shared.v1.FileStatusR\fuploadStatusB\x0f\n" +
+	"\rupload_status\x18\v \x01(\x0e2\x15.shared.v1.FileStatusR\fuploadStatus\x12#\n" +
+	"\roriginal_name\x18\f \x01(\tR\foriginalNameB\x0f\n" +
 	"\r_download_urlB\r\n" +
 	"\v_expires_atB\n" +
 	"\n" +

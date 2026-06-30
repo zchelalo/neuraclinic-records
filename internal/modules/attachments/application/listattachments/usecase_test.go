@@ -47,16 +47,22 @@ func TestListAttachmentsOnlyGeneratesDownloadURLForAvailableViewableFiles(t *tes
 		t.Fatalf("Execute returned error: %v", err)
 	}
 
+	if len(result.Attachments) != 2 {
+		t.Fatalf("expected only available attachments in response, got %d", len(result.Attachments))
+	}
 	if files.calls != 1 {
 		t.Fatalf("expected one download URL generation, got %d", files.calls)
+	}
+	if result.Attachments[0].UploadStatus != sharedv1.FileStatus_FILE_STATUS_AVAILABLE {
+		t.Fatalf("expected first attachment to be available, got %s", result.Attachments[0].UploadStatus)
 	}
 	if result.Attachments[0].DownloadURL == nil || *result.Attachments[0].DownloadURL != "http://download/available" {
 		t.Fatalf("expected available attachment download url, got %#v", result.Attachments[0].DownloadURL)
 	}
-	if result.Attachments[1].DownloadURL != nil {
-		t.Fatal("expected uploading attachment to have no download url")
+	if result.Attachments[1].UploadStatus != sharedv1.FileStatus_FILE_STATUS_AVAILABLE {
+		t.Fatalf("expected second attachment to be available, got %s", result.Attachments[1].UploadStatus)
 	}
-	if result.Attachments[2].DownloadURL != nil {
+	if result.Attachments[1].DownloadURL != nil {
 		t.Fatal("expected non-viewable attachment to have no download url")
 	}
 }

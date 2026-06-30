@@ -170,6 +170,7 @@ func AttachmentToProto(attachment attachmentdomain.Attachment) *recordv1.Attachm
 	resp := &recordv1.Attachment{
 		Id:           attachment.ID.String(),
 		FileId:       attachment.FileID.String(),
+		OriginalName: attachment.OriginalName,
 		MimeType:     attachment.MimeType,
 		UploadStatus: attachment.UploadStatus,
 		PatientId:    attachment.PatientID.String(),

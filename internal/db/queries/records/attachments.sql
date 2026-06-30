@@ -1,8 +1,8 @@
 -- name: CreateAttachment :one
 INSERT INTO attachments (
-  id, file_id, mime_type, patient_id, note_id, upload_status, created_at, updated_at
+  id, file_id, original_name, mime_type, patient_id, note_id, upload_status, created_at, updated_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $7
+  $1, $2, $3, $4, $5, $6, $7, $8, $8
 )
 RETURNING *;
 
@@ -22,6 +22,7 @@ JOIN patients p ON p.id = att.patient_id
 WHERE p.psychologist_id = $1
   AND att.patient_id = $2
   AND (sqlc.narg(note_id)::uuid IS NULL OR att.note_id = sqlc.narg(note_id)::uuid)
+  AND att.upload_status = 'FILE_STATUS_AVAILABLE'
   AND att.deleted_at IS NULL
   AND p.deleted_at IS NULL
   AND (

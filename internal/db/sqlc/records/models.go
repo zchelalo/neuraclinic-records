@@ -46,6 +46,7 @@ type Attachment struct {
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
 	UploadStatus string             `json:"upload_status"`
+	OriginalName string             `json:"original_name"`
 }
 
 type Familiogram struct {

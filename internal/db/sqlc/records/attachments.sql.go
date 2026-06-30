@@ -13,16 +13,17 @@ import (
 
 const createAttachment = `-- name: CreateAttachment :one
 INSERT INTO attachments (
-  id, file_id, mime_type, patient_id, note_id, upload_status, created_at, updated_at
+  id, file_id, original_name, mime_type, patient_id, note_id, upload_status, created_at, updated_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $7
+  $1, $2, $3, $4, $5, $6, $7, $8, $8
 )
-RETURNING id, file_id, mime_type, patient_id, note_id, created_at, updated_at, deleted_at, upload_status
+RETURNING id, file_id, mime_type, patient_id, note_id, created_at, updated_at, deleted_at, upload_status, original_name
 `
 
 type CreateAttachmentParams struct {
 	ID           pgtype.UUID        `json:"id"`
 	FileID       pgtype.UUID        `json:"file_id"`
+	OriginalName string             `json:"original_name"`
 	MimeType     string             `json:"mime_type"`
 	PatientID    pgtype.UUID        `json:"patient_id"`
 	NoteID       pgtype.UUID        `json:"note_id"`
@@ -34,6 +35,7 @@ func (q *Queries) CreateAttachment(ctx context.Context, arg CreateAttachmentPara
 	row := q.db.QueryRow(ctx, createAttachment,
 		arg.ID,
 		arg.FileID,
+		arg.OriginalName,
 		arg.MimeType,
 		arg.PatientID,
 		arg.NoteID,
@@ -51,6 +53,7 @@ func (q *Queries) CreateAttachment(ctx context.Context, arg CreateAttachmentPara
 		&i.UpdatedAt,
 		&i.DeletedAt,
 		&i.UploadStatus,
+		&i.OriginalName,
 	)
 	return i, err
 }
@@ -81,7 +84,7 @@ func (q *Queries) DeleteAttachment(ctx context.Context, arg DeleteAttachmentPara
 }
 
 const getAttachmentByID = `-- name: GetAttachmentByID :one
-SELECT att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at, att.upload_status
+SELECT att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at, att.upload_status, att.original_name
 FROM attachments att
 JOIN patients p ON p.id = att.patient_id
 WHERE att.id = $1
@@ -108,17 +111,19 @@ func (q *Queries) GetAttachmentByID(ctx context.Context, arg GetAttachmentByIDPa
 		&i.UpdatedAt,
 		&i.DeletedAt,
 		&i.UploadStatus,
+		&i.OriginalName,
 	)
 	return i, err
 }
 
 const listAttachments = `-- name: ListAttachments :many
-SELECT att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at, att.upload_status
+SELECT att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at, att.upload_status, att.original_name
 FROM attachments att
 JOIN patients p ON p.id = att.patient_id
 WHERE p.psychologist_id = $1
   AND att.patient_id = $2
   AND ($3::uuid IS NULL OR att.note_id = $3::uuid)
+  AND att.upload_status = 'FILE_STATUS_AVAILABLE'
   AND att.deleted_at IS NULL
   AND p.deleted_at IS NULL
   AND (
@@ -172,6 +177,7 @@ func (q *Queries) ListAttachments(ctx context.Context, arg ListAttachmentsParams
 			&i.UpdatedAt,
 			&i.DeletedAt,
 			&i.UploadStatus,
+			&i.OriginalName,
 		); err != nil {
 			return nil, err
 		}
@@ -188,7 +194,7 @@ UPDATE attachments att
 SET upload_status = $2, updated_at = $3
 WHERE att.file_id = $1
   AND att.deleted_at IS NULL
-RETURNING att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at, att.upload_status
+RETURNING att.id, att.file_id, att.mime_type, att.patient_id, att.note_id, att.created_at, att.updated_at, att.deleted_at, att.upload_status, att.original_name
 `
 
 type UpdateAttachmentUploadStatusByFileIDParams struct {
@@ -210,6 +216,7 @@ func (q *Queries) UpdateAttachmentUploadStatusByFileID(ctx context.Context, arg 
 		&i.UpdatedAt,
 		&i.DeletedAt,
 		&i.UploadStatus,
+		&i.OriginalName,
 	)
 	return i, err
 }

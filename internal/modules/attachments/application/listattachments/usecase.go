@@ -57,10 +57,15 @@ func (uc *UseCase) Execute(ctx context.Context, cmd Command) (domain.AttachmentL
 	if err != nil {
 		return domain.AttachmentList{}, err
 	}
+	filteredAttachments := make([]domain.Attachment, 0, len(result.Attachments))
 	for i := range result.Attachments {
 		if result.Attachments[i].UploadStatus != sharedv1.FileStatus_FILE_STATUS_AVAILABLE {
 			continue
 		}
+		filteredAttachments = append(filteredAttachments, result.Attachments[i])
+	}
+	result.Attachments = filteredAttachments
+	for i := range result.Attachments {
 		if !isViewable(result.Attachments[i].MimeType) {
 			continue
 		}
